@@ -34,6 +34,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		ClaimCreated(T::AccountId, Vec<u8>),
 		ClaimRevoked(T::AccountId, Vec<u8>),
+        ClaimTransferd(T::AccountId, T::AccountId, Vec<u8>)
 	}
 
 	#[pallet::error]
@@ -95,8 +96,9 @@ pub mod pallet {
 			let (owner, _) = Proofs::<T>::get(&bounded_claim).ok_or(Error::<T>::ClaimNotExist)?;
 			ensure!(owner == sender, Error::<T>::NotClaimOwner);
 
-			Proofs::<T>::insert(&bounded_claim, (dest, frame_system::Pallet::<T>::block_number()));
+			Proofs::<T>::insert(&bounded_claim, (dest.clone(), frame_system::Pallet::<T>::block_number()));
 
+            Self::deposit_event(Event::ClaimTransferd(sender, dest, claim));
 			Ok(().into())
 		}
 	}
